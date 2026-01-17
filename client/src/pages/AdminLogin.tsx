@@ -3,11 +3,13 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Lock, BookOpen } from "lucide-react";
+import { Lock } from "lucide-react";
 import { toast } from "sonner";
+import * as bcrypt from "bcryptjs";
 
-// قائمة كلمات السر المقبولة
-const ADMIN_PASSWORDS = ["حسن", "hassan"];
+// Hash لكلمة السر "hassan" باستخدام bcrypt
+// يمكن إنشاء hash جديد باستخدام: bcrypt.hash('hassan', 12)
+const ADMIN_PASSWORD_HASH = "$2b$12$TiIzlpdsbCHXJBISsedDWe5Z9816MO8H1C0Hj.LTpDPteFw15pdFG";
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
@@ -18,17 +20,22 @@ export default function AdminLogin() {
     e.preventDefault();
     setIsLoading(true);
 
-    // محاكاة تأخير للتحقق من كلمة السر
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    try {
+      // التحقق من كلمة السر باستخدام bcrypt
+      const isValid = await bcrypt.compare(password, ADMIN_PASSWORD_HASH);
 
-    if (ADMIN_PASSWORDS.includes(password)) {
-      // حفظ حالة تسجيل الدخول في sessionStorage
-      sessionStorage.setItem("adminAuthenticated", "true");
-      toast.success("تم تسجيل الدخول بنجاح!");
-      setLocation("/admin");
-    } else {
-      toast.error("كلمة السر غير صحيحة");
-      setPassword("");
+      if (isValid) {
+        // حفظ حالة تسجيل الدخول في sessionStorage
+        sessionStorage.setItem("adminAuthenticated", "true");
+        toast.success("تم تسجيل الدخول بنجاح!");
+        setLocation("/admin");
+      } else {
+        toast.error("كلمة السر غير صحيحة");
+        setPassword("");
+      }
+    } catch (error) {
+      console.error("خطأ في التحقق من كلمة السر:", error);
+      toast.error("حدث خطأ أثناء التحقق من كلمة السر");
     }
 
     setIsLoading(false);
@@ -54,7 +61,7 @@ export default function AdminLogin() {
             </label>
             <Input
               type="password"
-              placeholder="أدخل كلمة السر (حسن أو hassan)"
+              placeholder="أدخل كلمة السر"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
@@ -74,7 +81,7 @@ export default function AdminLogin() {
         </form>
 
         <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-          <p>🔒 كلمات السر المقبولة: "حسن" أو "hassan"</p>
+          <p>🔒 هذه الصفحة محمية بكلمة سر مشفرة</p>
         </div>
       </Card>
     </div>

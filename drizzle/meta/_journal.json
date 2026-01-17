@@ -15,6 +15,13 @@
       "when": 1768661834409,
       "tag": "0001_petite_the_executioner",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1768664587579,
+      "tag": "0002_cuddly_venom",
+      "breakpoints": true
     }
   ]
 }

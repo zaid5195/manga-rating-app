@@ -86,8 +86,57 @@ export const readingLinks = mysqlTable("readingLinks", {
   workId: int("workId").notNull().references(() => works.id, { onDelete: "cascade" }),
   platform: varchar("platform", { length: 100 }).notNull(), // e.g., "MangaDex", "Webtoon", "Tappytoon"
   url: varchar("url", { length: 512 }).notNull(),
+  isActive: int("isActive").default(1).notNull(),
   createdAt: timestamp("createdAt").defaultNow().notNull(),
 });
 
 export type ReadingLink = typeof readingLinks.$inferSelect;
 export type InsertReadingLink = typeof readingLinks.$inferInsert;
+
+// أنواع المانجا والمانهوا الشاملة
+export const MANGA_GENRES = [
+  "Action",
+  "Adventure",
+  "Comedy",
+  "Drama",
+  "Fantasy",
+  "Horror",
+  "Mystery",
+  "Psychological",
+  "Romance",
+  "School",
+  "Sci-Fi",
+  "Slice of Life",
+  "Sports",
+  "Supernatural",
+  "Thriller",
+  "Tragedy",
+  "Isekai",
+  "Harem",
+  "Shounen",
+  "Shoujo",
+  "Seinen",
+  "Josei",
+  "Mecha",
+  "Military",
+  "Police",
+  "Martial Arts",
+  "Magic",
+  "Vampire",
+  "Demon",
+  "Angels",
+  "Aliens",
+  "Monsters",
+  "Time Travel",
+  "Reincarnation",
+  "Game",
+  "Cooking",
+  "Music",
+  "Art",
+  "Shounen Ai",
+  "Yaoi",
+  "Shoujo Ai",
+  "Yuri",
+] as const;
+
+export type MangaGenre = typeof MANGA_GENRES[number];

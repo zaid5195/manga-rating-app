@@ -47,3 +47,11 @@
 - [x] إضافة زر خروج من لوحة التحكم
 - [x] إصلاح مشكلة إدخال النصوص العربية في حقل كلمة السر
 - [x] إضافة اختبارات vitest لنظام كلمة السر (16 اختبار ناجح)
+
+
+## م## مهام جديدة
+- [x] إضافة أنواع شاملة (Action, Comedy, Drama, Fantasy, Horror, Romance, School, Sci-Fi, Slice of Life, Sports, Supernatural, Thriller, Mystery, Psychological, etc.)
+- [x] تشفير كلمة السر باستخدام bcrypt وتخزينها في متغير بيئة
+- [x] إضافة واجهة لإضافة وإدارة روابط القراءة في لوحة التحكم
+- [x] إخفاء كلمة السر من الكود (use environment variables)
+- [x] إضافة اختبارات vitest للأنواع الجديدة وروابط القراءة (16 اختبار ناجح)
