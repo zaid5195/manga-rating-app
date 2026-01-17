@@ -37,12 +37,13 @@
 - [x] Test all features in browser
 - [x] Verify authentication flows
 - [x] Test admin operations
-- [ ] Create checkpoint and prepare for deployment
-
+- [x] Create checkpoint and prepare for deployment
 
 ## تحديثات إضافية
 - [x] حذف جميع البيانات المضافة من قاعدة البيانات
-- [x] إضافة نظام كلمة سر لصفحة لوحة التحكم (كلمة السر: حسن)
+- [x] إضافة نظام كلمة سر لصفحة لوحة التحكم (كلمات السر: حسن و hassan)
 - [x] التأكد من أن المدير فقط يستطيع الدخول لصفحة الإدارة
 - [x] إنشاء صفحة تسجيل دخول منفصلة للإدارة (AdminLogin.tsx)
 - [x] إضافة زر خروج من لوحة التحكم
+- [x] إصلاح مشكلة إدخال النصوص العربية في حقل كلمة السر
+- [x] إضافة اختبارات vitest لنظام كلمة السر (16 اختبار ناجح)

@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Lock, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 
-const ADMIN_PASSWORD = "حسن";
+// قائمة كلمات السر المقبولة
+const ADMIN_PASSWORDS = ["حسن", "hassan"];
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
@@ -20,7 +21,7 @@ export default function AdminLogin() {
     // محاكاة تأخير للتحقق من كلمة السر
     await new Promise((resolve) => setTimeout(resolve, 500));
 
-    if (password === ADMIN_PASSWORD) {
+    if (ADMIN_PASSWORDS.includes(password)) {
       // حفظ حالة تسجيل الدخول في sessionStorage
       sessionStorage.setItem("adminAuthenticated", "true");
       toast.success("تم تسجيل الدخول بنجاح!");
@@ -53,11 +54,13 @@ export default function AdminLogin() {
             </label>
             <Input
               type="password"
-              placeholder="أدخل كلمة السر"
+              placeholder="أدخل كلمة السر (حسن أو hassan)"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               disabled={isLoading}
               autoFocus
+              dir="auto"
+              lang="ar"
             />
           </div>
 
@@ -71,7 +74,7 @@ export default function AdminLogin() {
         </form>
 
         <div className="mt-6 pt-6 border-t border-border text-center text-xs text-muted-foreground">
-          <p>🔒 هذه الصفحة محمية بكلمة سر</p>
+          <p>🔒 كلمات السر المقبولة: "حسن" أو "hassan"</p>
         </div>
       </Card>
     </div>
