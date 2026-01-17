@@ -9,14 +9,16 @@ import Works from "./pages/Works";
 import WorkDetail from "./pages/WorkDetail";
 import Profile from "./pages/Profile";
 import Admin from "./pages/Admin";
+import AdminLogin from "./pages/AdminLogin";
 
 function Router() {
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
+      <Route path={"\\"} component={Home} />
       <Route path={"/works"} component={Works} />
       <Route path={"/work/:id"} component={WorkDetail} />
       <Route path={"/profile"} component={Profile} />
+      <Route path={"/admin-login"} component={AdminLogin} />
       <Route path={"/admin"} component={Admin} />
       <Route path={"/404"} component={NotFound} />
       <Route component={NotFound} />

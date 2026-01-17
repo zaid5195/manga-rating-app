@@ -1,0 +1,9 @@
+{
+  "query": "DELETE FROM reviews; DELETE FROM ratings; DELETE FROM readingLinks; DELETE FROM works;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway03.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 3e6AkoCwVEaoM1j.dda3fd831361 --database UC6dnrevTsjR5ZDbeU4rFq --execute DELETE FROM reviews; DELETE FROM ratings; DELETE FROM readingLinks; DELETE FROM works;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 226
+}

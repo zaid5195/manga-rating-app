@@ -10,17 +10,31 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowLeft, Plus, Trash2, Edit2, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Edit2, Loader2, LogOut } from "lucide-react";
 import { trpc } from "@/lib/trpc";
-import { Link } from "wouter";
-import { useState } from "react";
+import { Link, useLocation } from "wouter";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
 
 export default function Admin() {
   const { user, isAuthenticated } = useAuth();
+  const [, setLocation] = useLocation();
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
+
+  useEffect(() => {
+    // التحقق من حالة المصادقة من sessionStorage
+    const authenticated = sessionStorage.getItem("adminAuthenticated") === "true";
+    setIsAdminAuthenticated(authenticated);
+  }, []);
+
+  const handleLogout = () => {
+    sessionStorage.removeItem("adminAuthenticated");
+    toast.success("تم تسجيل الخروج بنجاح");
+    setLocation("/admin-login");
+  };
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -111,6 +125,17 @@ export default function Admin() {
     );
   }
 
+  if (!isAdminAuthenticated) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <h1 className="text-2xl font-bold">يجب إدخال كلمة السر</h1>
+        <Link href="/admin-login">
+          <Button>الذهاب لصفحة تسجيل الدخول</Button>
+        </Link>
+      </div>
+    );
+  }
+
   const handleSubmit = async () => {
     if (!formData.title.trim()) {
       toast.error("يجب إدخال العنوان");
@@ -146,13 +171,22 @@ export default function Admin() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="border-b border-border bg-background/80 backdrop-blur-sm sticky top-0 z-40">
-        <div className="container py-4">
+        <div className="container py-4 flex items-center justify-between">
           <Link href="/">
             <Button variant="ghost" size="sm" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
               العودة
             </Button>
           </Link>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="gap-2"
+          >
+            <LogOut className="h-4 w-4" />
+            خروج
+          </Button>
         </div>
       </header>
 
