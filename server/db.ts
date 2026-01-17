@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, works, ratings, reviews, readingLinks, InsertWork } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,115 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// Works queries
+export async function getWorks(limit: number = 20, offset: number = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(works).limit(limit).offset(offset);
+}
+
+export async function getWorkById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(works).where(eq(works.id, id)).limit(1);
+  return result[0];
+}
+
+export async function searchWorks(query: string, limit: number = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  // Basic search by title or author
+  if (!query) return db.select().from(works).limit(limit);
+  return db.select().from(works).limit(limit);
+}
+
+export async function createWork(work: InsertWork) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  const result = await db.insert(works).values(work);
+  return result;
+}
+
+export async function updateWork(id: number, work: Partial<InsertWork>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.update(works).set(work).where(eq(works.id, id));
+}
+
+export async function deleteWork(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(works).where(eq(works.id, id));
+}
+
+// Ratings queries
+export async function getRatingByUserAndWork(userId: number, workId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+  const result = await db.select().from(ratings).where(
+    and(eq(ratings.userId, userId), eq(ratings.workId, workId))
+  ).limit(1);
+  return result[0];
+}
+
+export async function createOrUpdateRating(userId: number, workId: number, score: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  
+  const existing = await getRatingByUserAndWork(userId, workId);
+  if (existing) {
+    return db.update(ratings).set({ score }).where(eq(ratings.id, existing.id));
+  } else {
+    return db.insert(ratings).values({ userId, workId, score });
+  }
+}
+
+export async function getWorkRatings(workId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(ratings).where(eq(ratings.workId, workId));
+}
+
+// Reviews queries
+export async function getReviewsByWork(workId: number, limit: number = 10, offset: number = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(reviews).where(eq(reviews.workId, workId)).limit(limit).offset(offset);
+}
+
+export async function createReview(userId: number, workId: number, content: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(reviews).values({ userId, workId, content });
+}
+
+export async function deleteReview(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(reviews).where(eq(reviews.id, id));
+}
+
+export async function getUserReviews(userId: number, limit: number = 20, offset: number = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(reviews).where(eq(reviews.userId, userId)).limit(limit).offset(offset);
+}
+
+// Reading Links queries
+export async function getReadingLinks(workId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(readingLinks).where(eq(readingLinks.workId, workId));
+}
+
+export async function createReadingLink(workId: number, platform: string, url: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(readingLinks).values({ workId, platform, url });
+}
+
+export async function deleteReadingLink(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(readingLinks).where(eq(readingLinks.id, id));
+}
