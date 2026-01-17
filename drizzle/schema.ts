@@ -140,3 +140,16 @@ export const MANGA_GENRES = [
 ] as const;
 
 export type MangaGenre = typeof MANGA_GENRES[number];
+
+/**
+ * Favorites table: Stores user favorite works
+ */
+export const favorites = mysqlTable("favorites", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
+  workId: int("workId").notNull().references(() => works.id, { onDelete: "cascade" }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type Favorite = typeof favorites.$inferSelect;
+export type InsertFavorite = typeof favorites.$inferInsert;

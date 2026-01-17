@@ -1,6 +1,6 @@
 import { eq, and, desc } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, works, ratings, reviews, readingLinks, InsertWork } from "../drizzle/schema";
+import { InsertUser, users, works, ratings, reviews, readingLinks, InsertWork, favorites } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -200,4 +200,64 @@ export async function deleteReadingLink(id: number) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
   return db.delete(readingLinks).where(eq(readingLinks.id, id));
+}
+
+// Favorites queries
+export async function addToFavorites(userId: number, workId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.insert(favorites).values({ userId, workId });
+}
+
+export async function removeFromFavorites(userId: number, workId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+  return db.delete(favorites).where(
+    and(eq(favorites.userId, userId), eq(favorites.workId, workId))
+  );
+}
+
+export async function getUserFavorites(userId: number, limit: number = 20, offset: number = 0) {
+  const db = await getDb();
+  if (!db) return [];
+  const favs = await db.select().from(favorites)
+    .where(eq(favorites.userId, userId))
+    .orderBy(desc(favorites.createdAt))
+    .limit(limit)
+    .offset(offset);
+  
+  // Get work details for each favorite
+  const workIds = favs.map(f => f.workId);
+  if (workIds.length === 0) return [];
+  
+  const workDetails = await db.select().from(works).where(
+    and(...workIds.map(id => eq(works.id, id)))
+  );
+  return workDetails;
+}
+
+export async function isFavorite(userId: number, workId: number) {
+  const db = await getDb();
+  if (!db) return false;
+  const result = await db.select().from(favorites).where(
+    and(eq(favorites.userId, userId), eq(favorites.workId, workId))
+  ).limit(1);
+  return result.length > 0;
+}
+
+// Advanced ratings queries
+export async function getRatingsByWork(workId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(ratings)
+    .where(eq(ratings.workId, workId))
+    .orderBy(desc(ratings.createdAt));
+}
+
+export async function getRatingsByWorkAndScore(workId: number, score: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(ratings)
+    .where(and(eq(ratings.workId, workId), eq(ratings.score, score)))
+    .orderBy(desc(ratings.createdAt));
 }

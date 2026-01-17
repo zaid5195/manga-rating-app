@@ -19,8 +19,15 @@ import {
   getReadingLinks,
   createReadingLink,
   deleteReadingLink,
+  addToFavorites,
+  removeFromFavorites,
+  getUserFavorites,
+  isFavorite,
+  getRatingsByWork,
+  getRatingsByWorkAndScore,
 } from "./db";
 import { TRPCError } from "@trpc/server";
+import { uploadImage, validateImageFile } from "./upload-handler";
 
 export const appRouter = router({
   system: systemRouter,
@@ -217,6 +224,88 @@ export const appRouter = router({
         }
         
         return deleteReadingLink(input.id);
+      }),
+  }),
+
+  // Favorites Router
+  favorites: router({
+    add: protectedProcedure
+      .input(z.object({ workId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED" });
+        return addToFavorites(ctx.user.id, input.workId);
+      }),
+
+    remove: protectedProcedure
+      .input(z.object({ workId: z.number() }))
+      .mutation(async ({ input, ctx }) => {
+        if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED" });
+        return removeFromFavorites(ctx.user.id, input.workId);
+      }),
+
+    list: protectedProcedure
+      .input(z.object({
+        limit: z.number().min(1).max(100).default(20),
+        offset: z.number().min(0).default(0),
+      }))
+      .query(async ({ input, ctx }) => {
+        if (!ctx.user) throw new TRPCError({ code: "UNAUTHORIZED" });
+        return getUserFavorites(ctx.user.id, input.limit, input.offset);
+      }),
+
+    isFavorite: protectedProcedure
+      .input(z.object({ workId: z.number() }))
+      .query(async ({ input, ctx }) => {
+        if (!ctx.user) return false;
+        return isFavorite(ctx.user.id, input.workId);
+      }),
+  }),
+
+  // Advanced Ratings Router
+  advancedRatings: router({
+    getByWork: publicProcedure
+      .input(z.object({ workId: z.number() }))
+      .query(async ({ input }) => {
+        return getRatingsByWork(input.workId);
+      }),
+
+    getByScore: publicProcedure
+      .input(z.object({
+        workId: z.number(),
+        score: z.number().min(1).max(5),
+      }))
+      .query(async ({ input }) => {
+        return getRatingsByWorkAndScore(input.workId, input.score);
+      }),
+  }),
+
+  upload: router({
+    image: protectedProcedure
+      .input(z.object({
+        fileData: z.string(),
+        fileName: z.string().min(1),
+        mimeType: z.string().min(1),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (ctx.user?.role !== "admin") {
+          throw new TRPCError({ code: "FORBIDDEN" });
+        }
+        try {
+          const buffer = Buffer.from(input.fileData, "base64");
+          await validateImageFile({
+            size: buffer.length,
+            type: input.mimeType,
+            name: input.fileName,
+          });
+          const result = await uploadImage(buffer, input.fileName, input.mimeType);
+          return result;
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Upload failed";
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message,
+          });
+        }
       }),
   }),
 });

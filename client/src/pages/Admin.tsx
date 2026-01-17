@@ -1,4 +1,3 @@
-import { useAuth } from "@/_core/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -17,6 +16,8 @@ import { Link, useLocation } from "wouter";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { getLoginUrl } from "@/const";
+import ImageUploader from "@/components/ImageUploader";
+import { useAuth } from "@/_core/hooks/useAuth";
 
 // أنواع المانجا والمانهوا الشاملة
 const MANGA_GENRES = [
@@ -65,7 +66,6 @@ const MANGA_GENRES = [
 ];
 
 export default function Admin() {
-  const { user, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -84,6 +84,11 @@ export default function Admin() {
     setLocation("/admin-login");
   };
 
+  const handleImageUploaded = (url: string) => {
+    setFormData((prev) => ({ ...prev, coverImageUrl: url }));
+    toast.success("تم رفع الصورة بنجاح!");
+  };
+
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -100,6 +105,8 @@ export default function Admin() {
     platform: "",
     url: "",
   });
+
+  const { user, isAuthenticated } = useAuth();
 
   const { data: works, refetch: refetchWorks } = trpc.works.list.useQuery(
     { limit: 100, offset: 0 }
@@ -403,13 +410,20 @@ export default function Admin() {
                     />
                   </div>
 
-                  <Input
-                    placeholder="رابط صورة الغلاف"
-                    value={formData.coverImageUrl}
-                    onChange={(e) =>
-                      setFormData({ ...formData, coverImageUrl: e.target.value })
-                    }
-                  />
+              <ImageUploader
+                onImageUploaded={handleImageUploaded}
+                label="صورة الغلاف"
+                disabled={createMutation.isPending || updateMutation.isPending}
+              />
+              <div className="text-sm text-muted-foreground">
+                الرابط الحالي: {formData.coverImageUrl ? (
+                  <a href={formData.coverImageUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                    عرض الصورة
+                  </a>
+                ) : (
+                  "لم يتم رفع صورة"
+                )}
+              </div>
 
                   <div>
                     <label className="text-sm font-medium mb-3 block">الأنواع</label>
